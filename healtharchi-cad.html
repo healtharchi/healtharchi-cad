@@ -274,63 +274,6 @@
 </style>
 </head>
 <body>
-
-<!-- ============== HEALTH ARCHI 免責同意モーダル (P022 で追加) ============== -->
-<div id="haDisclaimer" style="position:fixed;inset:0;z-index:9999;background:rgba(15,17,22,.92);
-  display:none;align-items:center;justify-content:center;padding:20px;
-  font-family:'Hiragino Sans','Yu Gothic UI',sans-serif;">
-  <div style="max-width:560px;background:#252830;border:1px solid #3a3f4b;border-radius:14px;
-    padding:28px 26px;color:#d7dae0;line-height:1.65;font-size:14px;
-    box-shadow:0 20px 60px rgba(0,0,0,.6);">
-    <div style="font-size:18px;font-weight:700;color:#ff9d2f;letter-spacing:.08em;margin-bottom:14px;">
-      HEALTH ARCHI<span style="color:#37c0c8">·</span>CAD ご利用前に
-    </div>
-    <div style="background:#1b1d23;border-left:3px solid #ff9d2f;padding:12px 14px;border-radius:6px;
-      font-size:13px;margin-bottom:18px;">
-      <b style="color:#ff9d2f;">本ツールは「実験室公開ベータ版（v0.1）」です。</b><br>
-      重要な図面（本番納品図・確認申請図・施工図 等）は必ず<br>
-      <b>確定 CAD（AutoCAD・JW-CAD 等）で再チェック</b>してからご使用ください。
-    </div>
-    <div style="font-size:13px;margin-bottom:12px;">
-      ✅ <b>データはブラウザ内のみ</b>に保存されます。当社サーバーには一切送信されません<br>
-      ✅ MIT ライセンスで公開（商用利用・改変・再配布可）<br>
-      ⚠️ 本ツール使用により発生した一切の損害（業務損失・データ損失・取引先トラブル等）について、HEALTH ARCHI および開発者は責任を負いません
-    </div>
-    <div style="font-size:12px;color:#878d9a;margin-bottom:18px;">
-      詳細は <a href="https://healtharchi.com/tools" style="color:#37c0c8;" target="_blank" rel="noopener">実験室ページ</a>
-      または <a href="https://github.com/healtharchi/healtharchi-cad" style="color:#37c0c8;" target="_blank" rel="noopener">GitHub</a> をご参照ください。
-    </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;">
-      <button onclick="window.location.href='https://healtharchi.com/tools'"
-        style="background:transparent;color:#878d9a;border:1px solid #3a3f4b;padding:9px 16px;
-        border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;">
-        閉じる
-      </button>
-      <button onclick="haAcceptDisclaimer()"
-        style="background:#ff9d2f;color:#1b1d23;border:none;padding:9px 20px;
-        border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700;">
-        同意して使い始める
-      </button>
-    </div>
-  </div>
-</div>
-<script>
-(function(){
-  try {
-    if (!localStorage.getItem('ha_cad_disclaimer_v1')) {
-      document.getElementById('haDisclaimer').style.display = 'flex';
-    }
-  } catch(e) {
-    document.getElementById('haDisclaimer').style.display = 'flex';
-  }
-})();
-function haAcceptDisclaimer(){
-  try { localStorage.setItem('ha_cad_disclaimer_v1', new Date().toISOString()); } catch(e){}
-  document.getElementById('haDisclaimer').style.display = 'none';
-}
-</script>
-<!-- ============== 免責同意モーダル ここまで ============== -->
-
 <header>
   <div class="logo">HEALTH ARCHI<b>·</b>CAD</div>
   <div class="menu">
@@ -3579,4 +3522,70 @@ function ensureFirstTab(name){
 }
 function startNew(){
   // blank workspace
-  entities=[]; layers=blankLay
+  entities=[]; layers=blankLayers(); curLayer=0; blocks={}; undoStack=[]; redoStack=[];
+  sheet=blankSheet('図面1'); sheet.scaleDenom=100;
+  view={ox:0,oy:0,scale:0.5};
+  ensureFirstTab('図面1');
+  buildTabs(); buildLayers(); buildBlocks(); syncSheetUI();
+  hideStart(); zoomSheet(); updateInfo(); setTool('select');
+  log('新しい空の図面を作成しました。','sys');
+}
+function startDemo(){
+  entities=[]; layers=blankLayers(); curLayer=0; blocks={}; undoStack=[]; redoStack=[];
+  sheet=blankSheet('平面図'); sheet.scaleDenom=50;
+  view={ox:0,oy:0,scale:0.5};
+  ensureFirstTab('平面図');
+  loadDemo();
+  const [ww,wh]=sheetWorldSize(); sheet.x=2000-ww/2; sheet.y=1275-wh/2;
+  buildTabs(); buildLayers(); buildBlocks(); syncSheetUI();
+  hideStart(); zoomSheet(); updateInfo(); setTool('select');
+  log('サンプル図面を読み込みました。操作を試してみてください。','sys');
+}
+function startOpen(){
+  // make sure there's a tab to load into, then trigger open; hide start on success
+  if(!tabs.length){ entities=[];layers=blankLayers();curLayer=0;blocks={};undoStack=[];redoStack=[];
+    sheet=blankSheet('図面1');view={ox:0,oy:0,scale:0.5};ensureFirstTab('図面1');buildTabs();buildLayers();buildBlocks();syncSheetUI(); }
+  // wrap triggerOpen so we hide the start screen once a file is chosen
+  pendingHideStart=true;
+  triggerOpen();
+}
+let pendingHideStart=false;
+function setUIScale(v){
+  const z=parseFloat(v)||1;
+  // Apply zoom ONLY to the UI chrome (rail, side panel, header, tabs, floating bar).
+  // Zooming the whole body distorts the canvas's measured size (getBoundingClientRect
+  // returns zoom-scaled values), which broke the layout at 大/特大.
+  ['header','tabbar','rail','side','floatbar'].forEach(sel=>{
+    const el = sel==='header'?document.querySelector('header')
+            : sel==='rail'?document.getElementById('rail')
+            : sel==='side'?document.querySelector('.side')
+            : sel==='tabbar'?document.getElementById('tabbar')
+            : document.getElementById('floatbar');
+    if(el)el.style.zoom=z;
+  });
+  document.body.style.zoom=1;            // ensure body itself is never zoomed
+  try{ localStorage.setItem('hac_uiscale', String(z)); }catch(e){}
+  // recompute canvas backing store after the chrome resizes
+  if(typeof resize==='function') setTimeout(()=>{ resize(); }, 40);
+}
+
+function loadDemoInit(){ /* kept for clarity */ }
+function init(){
+  buildRail(); buildSnapChips(); initFloatBar(); buildGridPresets();
+  textOpt.h=defaultTextH(); dimOpt.h=defaultDimH();
+  document.getElementById('inpGrid').value=gridSize;
+  // restore UI scale preference
+  try{ const s=localStorage.getItem('hac_uiscale'); if(s){ document.getElementById('selUIScale').value=s; setUIScale(s); } }catch(e){}
+  // start with an empty (not-yet-committed) workspace and show the start screen
+  entities=[]; layers=blankLayers(); curLayer=0; blocks={}; undoStack=[]; redoStack=[];
+  sheet=blankSheet('図面1'); view={ox:0,oy:0,scale:0.5};
+  ensureFirstTab('図面1');
+  buildTabs(); buildLayers(); buildBlocks(); syncSheetUI();
+  resize(); updateInfo(); setTool('select');
+  showStart();
+  log('HEALTH ARCHI CAD へようこそ。','sys');
+}
+init();
+</script>
+</body>
+</html>
