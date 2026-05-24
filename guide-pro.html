@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HEALTH ARCHI CAD — 操作ガイド（CAD経験者向け）</title>
+<style>
+  :root{
+    --bg:#11141a; --bg2:#171b22; --panel:#1d222b; --panel2:#262c36;
+    --line:#2c333f; --ink:#e7eaef; --dim:#8b94a3; --accent:#ff9d2f;
+    --accent2:#37c0c8; --green:#1ec773; --red:#e5564b; --violet:#c98bff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    line-height:1.75;font-size:15px;
+    background-image:radial-gradient(circle at 15% -10%,#1c2733 0,transparent 45%),radial-gradient(circle at 90% 0,#241d16 0,transparent 40%);
+    background-attachment:fixed;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px 120px}
+
+  /* ---- masthead ---- */
+  header.top{padding:64px 0 30px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .brand{font-family:"Courier New",monospace;letter-spacing:.18em;font-weight:700;
+    font-size:13px;color:var(--accent);margin-bottom:18px}
+  h1.title{font-size:40px;line-height:1.2;margin:0 0 14px;font-weight:800;letter-spacing:-.01em}
+  h1.title small{display:block;font-size:16px;color:var(--accent2);font-weight:600;letter-spacing:.04em;margin-top:10px}
+  .lede{color:var(--dim);font-size:15px;max-width:680px}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.1em;color:var(--bg);
+    background:var(--accent);padding:3px 10px;border-radius:20px;font-weight:700;margin-bottom:22px}
+
+  /* ---- TOC ---- */
+  nav.toc{background:linear-gradient(180deg,var(--panel),#191e26);border:1px solid var(--line);
+    border-radius:14px;padding:22px 26px;margin:34px 0 50px;box-shadow:0 10px 40px #0006}
+  nav.toc h2{font-size:12px;letter-spacing:.16em;color:var(--accent);margin:0 0 14px;text-transform:uppercase}
+  nav.toc ol{margin:0;padding:0;list-style:none;counter-reset:toc;
+    columns:2;column-gap:40px}
+  nav.toc li{counter-increment:toc;padding:5px 0;break-inside:avoid}
+  nav.toc a{color:var(--ink);text-decoration:none;display:flex;gap:11px;align-items:baseline;
+    padding:4px 8px;border-radius:7px;transition:background .15s,color .15s}
+  nav.toc a:hover{background:var(--panel2);color:var(--accent)}
+  nav.toc a::before{content:counter(toc,decimal-leading-zero);color:var(--accent2);
+    font-family:"Courier New",monospace;font-size:12px;font-weight:700;flex:none}
+
+  /* ---- sections ---- */
+  section{margin:60px 0;scroll-margin-top:20px}
+  h2.sec{font-size:25px;font-weight:800;margin:0 0 6px;padding-bottom:0;letter-spacing:-.01em;
+    display:flex;align-items:center;gap:13px}
+  h2.sec .num{font-family:"Courier New",monospace;font-size:15px;color:var(--bg);
+    background:var(--accent);width:34px;height:34px;border-radius:9px;
+    display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+  .sec-rule{height:1px;background:linear-gradient(90deg,var(--accent),transparent);margin:14px 0 22px}
+  h3{font-size:17px;font-weight:700;margin:30px 0 8px;color:var(--ink)}
+  p{margin:10px 0}
+  .dim{color:var(--dim)}
+
+  /* ---- figures ---- */
+  figure{margin:22px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    background:var(--bg2);box-shadow:0 8px 30px #0005}
+  figure img{width:100%;display:block}
+  figure.crop img{background:var(--bg2)}
+  figcaption{font-size:12.5px;color:var(--dim);padding:10px 16px;border-top:1px solid var(--line);
+    background:var(--panel)}
+  figcaption b{color:var(--accent2);font-weight:700}
+
+  /* ---- callouts ---- */
+  .note,.tip,.warn{border-radius:10px;padding:14px 18px;margin:18px 0;font-size:14px;
+    border-left:3px solid;display:flex;gap:12px;align-items:flex-start}
+  .note{background:#1a2530;border-color:var(--accent2)}
+  .tip{background:#15241b;border-color:var(--green)}
+  .warn{background:#2a1d1a;border-color:var(--accent)}
+  .note .ic,.tip .ic,.warn .ic{font-weight:700;flex:none;font-size:13px;letter-spacing:.05em;
+    padding:2px 9px;border-radius:6px;margin-top:1px}
+  .note .ic{background:var(--accent2);color:var(--bg)}
+  .tip .ic{background:var(--green);color:var(--bg)}
+  .warn .ic{background:var(--accent);color:var(--bg)}
+
+  /* ---- steps ---- */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+  ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 44px;border-bottom:1px dashed #232a34}
+  ol.steps li:last-child{border-bottom:none}
+  ol.steps li::before{content:counter(s);position:absolute;left:0;top:7px;
+    width:28px;height:28px;border-radius:50%;background:var(--panel2);border:1px solid var(--accent2);
+    color:var(--accent2);font-family:"Courier New",monospace;font-weight:700;font-size:13px;
+    display:flex;align-items:center;justify-content:center}
+
+  /* ---- key / kbd ---- */
+  kbd{font-family:"Courier New",monospace;background:var(--panel2);border:1px solid var(--line);
+    border-bottom-width:2px;border-radius:5px;padding:1px 7px;font-size:12.5px;color:var(--ink);white-space:nowrap}
+  .cmd{font-family:"Courier New",monospace;background:#0d1014;border:1px solid var(--line);
+    border-radius:5px;padding:1px 7px;font-size:12.5px;color:var(--accent)}
+
+  /* ---- tables ---- */
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--accent);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    border-bottom:1px solid var(--accent)}
+  tr:hover td{background:var(--panel)}
+  td .cmd{font-size:12px}
+  .grp{color:var(--accent2);font-weight:700}
+
+  /* ---- tool cards ---- */
+  .toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+  .tcard{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:15px 17px}
+  .tcard h4{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:9px}
+  .tcard h4 .k{font-family:"Courier New",monospace;font-size:11px;background:var(--panel2);
+    border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--accent);font-weight:700}
+  .tcard p{margin:5px 0 0;font-size:13px;color:var(--dim);line-height:1.65}
+  .tcard p b{color:var(--ink)}
+
+  hr.div{border:none;border-top:1px solid var(--line);margin:50px 0}
+  footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);color:var(--dim);font-size:12.5px}
+  a.back{color:var(--accent2);text-decoration:none;font-size:12px}
+  a.back:hover{color:var(--accent)}
+
+  @media print{
+    body{background:#fff;color:#111;background-image:none}
+    nav.toc,figure,.tcard{box-shadow:none}
+    figure{break-inside:avoid}
+    section{break-inside:avoid-page}
+    .note,.tip,.warn{background:#f3f3f3}
+  }
+  @media (max-width:680px){
+    nav.toc ol{columns:1}
+    .toolgrid{grid-template-columns:1fr}
+    h1.title{font-size:30px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;background:#1b1d23;border:1px solid #3a3f4b;border-radius:8px;margin-bottom:18px;font-family:'Hiragino Sans','Yu Gothic UI',sans-serif;">
+  <div style="font-size:12px;color:#878d9a;letter-spacing:.06em;">📗 CAD経験者向け 操作ガイド</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="healtharchi-cad.html" style="display:inline-flex;align-items:center;gap:6px;background:#ff9d2f;color:#1b1d23;text-decoration:none;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:700;">🏠 CAD本体へ</a>
+    <a href="guide.html" style="display:inline-flex;align-items:center;gap:6px;background:transparent;color:#d7dae0;text-decoration:none;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:700;border:1px solid #3a3f4b;">📘 はじめての方向けガイド →</a>
+    <a href="https://healtharchi.com/tools" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:transparent;color:#37c0c8;text-decoration:none;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:700;border:1px solid #37c0c8;">🧪 実験室トップへ</a>
+  </div>
+</div>
+
+<header class="top">
+  <div class="brand">HEALTH ARCHI · CAD</div>
+  <span class="tag">CAD経験者向け 要点ガイド</span>
+  <h1 class="title">操作ガイド
+    <small>木造住宅向け 2D CAD ／ AutoCAD ライクなブラウザCAD</small>
+  </h1>
+  <p class="lede">本ガイドは、すでに何らかのCADを使ったことがある方向けに、HEALTH ARCHI CAD 特有の操作とクセだけを要点でまとめたものです。一般的なCADの基礎概念は省いています。「最初の一歩」と「作図ツール全部」を重点的に解説します。</p>
+</header>
+
+<nav class="toc">
+  <h2>目次</h2>
+  <ol>
+    <li><a href="#start">最初の一歩（新規〜保存）</a></li>
+    <li><a href="#ui">画面構成とAutoCADとの違い</a></li>
+    <li><a href="#operate">基本操作・スナップ・座標入力</a></li>
+    <li><a href="#draw">作図ツール（線・矩形・円ほか）</a></li>
+    <li><a href="#edit">編集ツール（移動・回転・トリム他）</a></li>
+    <li><a href="#annot">注釈（文字・寸法・引出線・塗り）</a></li>
+    <li><a href="#layer">画層・線種</a></li>
+    <li><a href="#block">部品化・配置</a></li>
+    <li><a href="#sheet">図面枠・印刷・保存形式</a></li>
+    <li><a href="#ref">ショートカット・コマンド一覧</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<section id="start">
+  <h2 class="sec"><span class="num">1</span>最初の一歩（新規〜保存）</h2>
+  <div class="sec-rule"></div>
+  <p>起動するとスタート画面が出ます。<b>新規</b>／<b>DXFを開く</b>／<b>サンプル図面</b>から選べます。まずはサンプルで操作感を掴むのが早道です。</p>
+
+  <ol class="steps">
+    <li>上メニュー <kbd>新規</kbd> で空の図面を作成（タブが1つ増えます）。</li>
+    <li>右パネル下部の <b>図面枠・印刷</b> を開き、用紙（A4〜A1）と縮尺（1:20〜1:500）を設定。文字・寸法サイズはこの縮尺に自動追従します。</li>
+    <li>作図する。座標は <b>mm 単位・Y軸上向き</b>です。</li>
+    <li>保存は <kbd>名前を付けて保存</kbd> または <kbd>Ctrl+S</kbd>。形式は <b>DXF（R12 / AC1009）</b>。</li>
+    <li>続きから編集するときは <kbd>開く</kbd>。<b>現在の図面を残したまま新しいタブで開きます</b>（上書きされません）。</li>
+  </ol>
+
+  <figure>
+    <img src="guide_img/01_overview.png" alt="全体画面">
+    <figcaption>サンプル図面を読み込んだ状態。左=ツール列、中央=作図領域、右=画層パネル、上=メニュー、下=コマンドログ。<b>保存形式はDXF</b>なので、他CADやJw_cad等とやり取りできます。</figcaption>
+  </figure>
+
+  <div class="note"><span class="ic">要点</span><div>保存＝DXFです。アプリ独自形式はありません。<b>部品（ブロック）もDXFに展開して書き出されます</b>。最近開いたファイルはスタート画面に表示されます。</div></div>
+</section>
+
+<!-- 2 -->
+<section id="ui">
+  <h2 class="sec"><span class="num">2</span>画面構成とAutoCADとの違い</h2>
+  <div class="sec-rule"></div>
+  <p>操作思想はAutoCAD準拠です。ホイールでズーム、中ボタンドラッグでパン。ただしブラウザCADゆえの違いがいくつかあります。</p>
+
+  <div class="toolgrid">
+    <div class="tcard"><h4>ツール列（左）</h4><p>基本／作図／編集／注釈／部品にグループ分け。クリックでツール選択。AutoCADのリボン相当。</p></div>
+    <div class="tcard"><h4>クイックバー（中央上）</h4><p>よく使うツールだけ集めた浮動パレット。<b>右端をドラッグで幅変更</b>、広げると横一列に。⚙で表示ツールを編集。上メニューの☑で表示/非表示。</p></div>
+    <div class="tcard"><h4>画層パネル（右）</h4><p>レイヤー一覧と線種設定。各行の⚙から設定画面。下に「グリッド・スナップ・トラッキング」「図面枠・印刷」を格納。</p></div>
+    <div class="tcard"><h4>コマンドログ（下）</h4><p>操作の案内と履歴。<b>上端をドラッグで高さ変更</b>。その下がコマンド入力欄。</p></div>
+  </div>
+
+  <figure class="crop">
+    <img src="guide_img/03_header.png" alt="上部メニュー">
+    <figcaption>上メニュー：<b>新規／開く／名前を付けて保存／上書き保存／全体表示／全画面</b>、元に戻す・やり直し、☑クイック、表示サイズ。ブラウザのUIが気になるときは <b>全画面</b> が便利です。</figcaption>
+  </figure>
+
+  <div class="note"><span class="ic">違い</span><div><b>初回は右パネルが折りたたまれています</b>。各セクションのタイトルをクリックで開閉します。表示サイズ（小/標準/大/特大）はUIのフチだけを拡大し、作図領域は歪みません。</div></div>
+</section>
+
+<!-- 3 -->
+<section id="operate">
+  <h2 class="sec"><span class="num">3</span>基本操作・スナップ・座標入力</h2>
+  <div class="sec-rule"></div>
+
+  <h3>選択</h3>
+  <p>クリックで単体選択。範囲選択は<b>ドラッグ</b>に加えて<b>2点クリック</b>でも可能です（1点目クリック→2点目クリック）。<b>左→右＝窓選択</b>（完全に囲んだものだけ）、<b>右→左＝交差選択</b>（線に触れたもの全部）。色で区別表示されます。選択解除は <kbd>Esc</kbd>。</p>
+
+  <h3>スナップとトラッキング</h3>
+  <p>右パネル「グリッド・スナップ・トラッキング」のチップで切替。</p>
+  <table>
+    <tr><th>機能</th><th>内容</th></tr>
+    <tr><td><b>グリッド</b></td><td>グリッド交点に吸着。間隔は木造用プリセット（1000/910/455/227.5mm）から選択、独自値も登録可。</td></tr>
+    <tr><td><b>スナップ</b></td><td>端点・中点・中心・交点・垂線・近接・四半円点などのオブジェクトスナップ。</td></tr>
+    <tr><td><b>直交</b></td><td>水平・垂直拘束（<kbd>F8</kbd>でも切替）。</td></tr>
+    <tr><td><b>トラッキング</b></td><td>角度ガイド。カーソルが角度線に近づくと吸着。グリッド×角度線の交点にも乗ります。</td></tr>
+  </table>
+
+  <h3>座標・数値入力（下のコマンド欄）</h3>
+  <table>
+    <tr><th>入力</th><th>意味</th></tr>
+    <tr><td><span class="cmd">100,200</span></td><td>絶対座標 (X=100, Y=200)</td></tr>
+    <tr><td><span class="cmd">@300,0</span></td><td>相対座標（直前の点から）</td></tr>
+    <tr><td><span class="cmd">@1000&lt;45</span></td><td>極座標（距離1000・角度45°）</td></tr>
+    <tr><td><span class="cmd">500</span></td><td>方向を示してから距離だけ入力（線）／円の半径</td></tr>
+  </table>
+  <div class="tip"><span class="ic">TIP</span><div>ツールのキー（<span class="cmd">L</span>=線、<span class="cmd">C</span>=円 など）をコマンド欄に打つだけでもツールが切り替わります。一覧は最終章に。</div></div>
+</section>
+
+<!-- 4 -->
+<section id="draw">
+  <h2 class="sec"><span class="num">4</span>作図ツール</h2>
+  <div class="sec-rule"></div>
+  <p>「作図」グループのツールです。各ツールは選択するとコマンドログに手順が出ます。</p>
+
+  <div class="toolgrid">
+    <div class="tcard"><h4>線 <span class="k">L</span></h4><p>始点→終点。連続クリックで折れ線的に続けられます。<b>方向を示して数値入力</b>で正確な長さ。</p></div>
+    <div class="tcard"><h4>矩形 <span class="k">REC</span></h4><p>1点目→対角。または1点目のあと <span class="cmd">@3000,2000</span> で<b>寸法指定</b>。</p></div>
+    <div class="tcard"><h4>円 <span class="k">C</span></h4><p>中心→半径（クリック or 数値）。</p></div>
+    <div class="tcard"><h4>楕円 <span class="k">EL</span></h4><p>中心→もう1点。または <span class="cmd">@2000,1000</span> で<b>横半径・縦半径</b>を指定。</p></div>
+    <div class="tcard"><h4>円弧 <span class="k">A</span></h4><p>通過3点で円弧を作図。</p></div>
+    <div class="tcard"><h4>複線（平行線）<span class="k">ML</span></h4><p>基準線を2点指定すると、設定した<b>本数・間隔</b>で平行線を一度に作図。壁の作図に。</p></div>
+  </div>
+
+  <h3>矩形の寸法指定</h3>
+  <figure>
+    <img src="guide_img/05_rect.png" alt="矩形の寸法入力">
+    <figcaption>1点目を置いた後、対角をクリックするか <span class="cmd">@3640,2730</span> のように打つと正確な寸法の矩形に。下のステータスに <b>幅×高</b> が表示されます。</figcaption>
+  </figure>
+
+  <h3>複線（壁を引く）</h3>
+  <figure>
+    <img src="guide_img/06_mline.png" alt="複線ポップアップ">
+    <figcaption>複線ツールを選ぶと<b>設定ポップアップが自動で開きます</b>。本数・間隔・両側/片側を決めてから基準線を2点クリック。ポップアップはドラッグ移動・×で閉じられます。</figcaption>
+  </figure>
+
+  <div class="note"><span class="ic">注意</span><div>「連続線（ポリライン）を手で描くツール」はありません。代わりに<b>矩形・複線・角丸</b>が内部でポリラインを生成します。連続線は頂点に小さなマーカーが表示され、単独の線と見分けられます。</div></div>
+</section>
+
+<!-- 5 -->
+<section id="edit">
+  <h2 class="sec"><span class="num">5</span>編集ツール</h2>
+  <div class="sec-rule"></div>
+
+  <h3>移動・複写・回転・鏡像 ＝「選択→右クリック確定→基点」方式</h3>
+  <p>このアプリの<b>最重要のクセ</b>です。AutoCADの「コマンド→対象選択→Enterで確定→基点」と同じ流れになっています。</p>
+  <ol class="steps">
+    <li>ツール（移動／複写／回転／鏡像）を選ぶ。</li>
+    <li>対象をクリックや範囲で<b>選択</b>（削除と同じ感覚）。</li>
+    <li><b>右クリックで選択を確定</b>。</li>
+    <li>基点をクリック → 目的点／角度／対称軸を指定。確定前に<b>残像（ゴースト）</b>で仕上がりが見えます。</li>
+  </ol>
+
+  <figure>
+    <img src="guide_img/08_rotate.png" alt="回転のゴーストプレビュー">
+    <figcaption>回転中。<b>緑＝元の図形、黄＝回転後のプレビュー</b>。基点からの破線がカーソル方向、ステータスに角度（例 35.0°）がリアルタイム表示。回転は数値角度も入力できます。鏡像は最後に対称軸の2点を指定します。</figcaption>
+  </figure>
+
+  <h3>トリム・延長 ＝ フェンス（折れ線）対応</h3>
+  <p>図形を直接クリックすれば1本ずつ処理。<b>何もない所からクリックすると「フェンス」が始まり</b>、折れ線を引いて <kbd>Enter</kbd> または右クリックで、横切った図形をまとめて切る／延ばすことができます。</p>
+  <figure>
+    <img src="guide_img/07_fence.png" alt="フェンストリムの軌跡">
+    <figcaption>フェンス・トリム進行中。打った点に丸マーカー、カーソルまで<b>赤い破線の軌跡</b>。この状態でEnterすると横切った縦線が一斉に切れます（延長は水色の軌跡）。連続線もトリムできます。</figcaption>
+  </figure>
+
+  <div class="toolgrid">
+    <div class="tcard"><h4>平行（オフセット）<span class="k">O</span></h4><p>距離を指定して平行コピー。距離はコマンド欄に数値で。</p></div>
+    <div class="tcard"><h4>結合（角合わせ）<span class="k">CN</span></h4><p>2本の線をクリック → 交点まで延長/トリムして角で結合（フィレット半径0相当）。</p></div>
+    <div class="tcard"><h4>角丸（フィレット）<span class="k">F</span></h4><p>2本の線を丸める。または<b>矩形・連続線の角を直接クリック</b>して丸める（半径を先に数値入力）。</p></div>
+    <div class="tcard"><h4>削除 <span class="k">E</span></h4><p>クリック or 範囲で選択して削除。<kbd>Delete</kbd>キーでも。</p></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="annot">
+  <h2 class="sec"><span class="num">6</span>注釈（文字・寸法・引出線・塗り）</h2>
+  <div class="sec-rule"></div>
+
+  <h3>文字・寸法のサイズは「自動」</h3>
+  <p>文字・寸法ツールを選ぶと設定ポップアップが開きます。<b>「自動」チェックがオン</b>のときは、用紙・縮尺から木造図面で見やすい高さ（紙面で約2.75mm／2.5mm）を自動計算し、図面枠を変えると追従します。オフにすると手動入力できます。</p>
+
+  <h3>寸法は高さが揃う</h3>
+  <p>寸法を連続して入れるとき、<b>既存の寸法線の高さに吸着</b>します（「寸法ライン（高さ揃え）」と表示）。ラインがバラつきません。手順は 2点 → 寸法線の位置、の順。</p>
+
+  <h3>引出線（矢印＋下線付き文字）</h3>
+  <p>注釈グループの<b>引出線</b>。<b>1点目＝矢印の先端、2点目＝文字の始まり（折れ点）</b>の順にクリックすると、矢印付きの引出線と下線付きの文字ができます。文字内容・サイズは文字ポップアップの設定を使います。</p>
+
+  <figure>
+    <img src="guide_img/10_dimleader.png" alt="寸法と引出線">
+    <figcaption>下＝寸法（自動サイズ）、右＝<b>引出線「通し柱」</b>。引出線は矢印→折れ点→下線付き文字、という構成。DXFには線＋文字として書き出されます。</figcaption>
+  </figure>
+
+  <div class="toolgrid">
+    <div class="tcard"><h4>塗り（ハッチング）<span class="k">H</span></h4><p>閉じた図形（矩形・円・閉じた連続線）の内側をクリックで塗る。斜線/クロス/ソリッドと間隔を設定。</p></div>
+    <div class="tcard"><h4>計測 <span class="k">DI</span></h4><p>2点間の距離を測る。作図はしません。</p></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="layer">
+  <h2 class="sec"><span class="num">7</span>画層・線種</h2>
+  <div class="sec-rule"></div>
+  <p>初期画層：<span class="grp">0 / 壁 / 柱 / 建具 / 寸法 / 文字 / 通り芯 / 設備</span>。<b>通り芯は初期で一点鎖線</b>に設定済みです。</p>
+
+  <h3>各レイヤーの設定は「歯車」から</h3>
+  <p>レイヤー行はスッキリ表示（色・名前・表示👁・ロック🔒・⚙）。<b>⚙をクリックすると設定画面</b>が開き、名前・色・標準線種・削除をまとめて行えます。</p>
+
+  <figure>
+    <img src="guide_img/09_layerset.png" alt="画層の設定画面">
+    <figcaption>画層の設定画面。<b>色のパレット、標準線種（実線/破線/一点鎖線/点線）、名前変更、削除</b>を1か所で。標準線種を設定すると、その画層に描いた図形は自動でその線種になります。</figcaption>
+  </figure>
+
+  <div class="note"><span class="ic">要点</span><div>個別の図形に線種を指定したいときは、画層パネルの「線種の手動指定」で線種を選び、選択図形に適用します。ロックした画層は薄く表示され、選択・編集できません（AutoCADと同様）。画層を削除するとき図形があれば「図形は画層0へ移動／図形も削除」を選べます。</div></div>
+</section>
+
+<!-- 8 -->
+<section id="block">
+  <h2 class="sec"><span class="num">8</span>部品化・配置（ブロック）</h2>
+  <div class="sec-rule"></div>
+  <p>繰り返し使う図形（建具・設備など）を部品として登録し、何度でも配置できます。<b>既製ライブラリはなく、自分で描いたものを登録</b>する方式です。</p>
+
+  <h3>部品化の手順</h3>
+  <ol class="steps">
+    <li><b>「選択」で部品にしたい図形を選ぶ</b>（複数可）。</li>
+    <li>部品ポップアップの<b>「選択中の○個を部品化」ボタン</b>を押す。</li>
+    <li><b>部品名を入力</b>。</li>
+    <li><b>基準点をクリック</b> → 登録完了。自動で「配置」モードに切り替わります。</li>
+  </ol>
+
+  <figure>
+    <img src="guide_img/11_block.png" alt="部品化ポップアップ">
+    <figcaption>部品化ポップアップ。手順①〜③が明示されています。<b>先に図形を選択 → ボタン → 命名 → 基準点</b>の順。</figcaption>
+  </figure>
+
+  <h3>配置</h3>
+  <p>「配置」ツールでポップアップの一覧から部品を選び、置きたい位置をクリック。<b>等倍・無回転で配置</b>します。向きを変えたいときは、配置後に<b>回転コマンド</b>を使ってください（縮尺・回転の入力欄はありません）。</p>
+
+  <div class="warn"><span class="ic">注意</span><div>部品化の作業中（基準点待ち等）に別のツールへ切り替えると、作業状態はクリアされます。配置に戻れば一覧から選び直して置けます。</div></div>
+</section>
+
+<!-- 9 -->
+<section id="sheet">
+  <h2 class="sec"><span class="num">9</span>図面枠・印刷・保存形式</h2>
+  <div class="sec-rule"></div>
+  <p>右パネル下の<b>「図面枠・印刷」</b>で、用紙サイズ・向き・縮尺・タイトルブロックを設定し、PDF印刷します。</p>
+  <ul>
+    <li><b>用紙</b>：A4〜A1、<b>縮尺</b>：1:20〜1:500。</li>
+    <li>用紙は半透明で表示され、グリッドが透けて位置合わせしやすい。</li>
+    <li>縮尺を変えると文字・寸法の自動サイズが再計算されます。</li>
+    <li>印刷ボタンからブラウザの印刷でPDF化できます。</li>
+  </ul>
+
+  <h3>保存・読み込み（DXF）</h3>
+  <table>
+    <tr><th>操作</th><th>内容</th></tr>
+    <tr><td>名前を付けて保存</td><td>DXF（R12/AC1009）で書き出し。線種・画層・色も保持。</td></tr>
+    <tr><td>上書き保存 <kbd>Ctrl+S</kbd></td><td>同じファイルに保存（Chrome/Edge）。</td></tr>
+    <tr><td>開く <kbd>Ctrl+O</kbd></td><td>DXFを<b>新しいタブ</b>で開く（現在の図面は保持）。</td></tr>
+  </table>
+  <div class="tip"><span class="ic">TIP</span><div>タブで複数図面を同時に扱えます。各タブは独立した図面・画層・図面枠を持ちます。</div></div>
+</section>
+
+<!-- 10 -->
+<section id="ref">
+  <h2 class="sec"><span class="num">10</span>ショートカット・コマンド一覧</h2>
+  <div class="sec-rule"></div>
+
+  <h3>キーボード</h3>
+  <table>
+    <tr><th>キー</th><th>動作</th><th>キー</th><th>動作</th></tr>
+    <tr><td><kbd>Ctrl+Z</kbd></td><td>元に戻す</td><td><kbd>Ctrl+S</kbd></td><td>保存</td></tr>
+    <tr><td><kbd>Ctrl+Y</kbd></td><td>やり直し</td><td><kbd>Ctrl+O</kbd></td><td>開く</td></tr>
+    <tr><td><kbd>F8</kbd></td><td>直交モード切替</td><td><kbd>Delete</kbd></td><td>選択を削除</td></tr>
+    <tr><td><kbd>Enter</kbd></td><td>フェンス確定など</td><td><kbd>Esc</kbd></td><td>コマンド中止・選択解除</td></tr>
+    <tr><td>ホイール</td><td>ズーム</td><td>中ボタンドラッグ</td><td>パン（移動）</td></tr>
+  </table>
+
+  <h3>コマンド欄キーワード（打つとツール切替）</h3>
+  <table>
+    <tr><th>キー</th><th>ツール</th><th>キー</th><th>ツール</th><th>キー</th><th>ツール</th></tr>
+    <tr><td><span class="cmd">L</span></td><td>線</td><td><span class="cmd">REC</span></td><td>矩形</td><td><span class="cmd">C</span></td><td>円</td></tr>
+    <tr><td><span class="cmd">EL</span></td><td>楕円</td><td><span class="cmd">A</span></td><td>円弧</td><td><span class="cmd">ML</span></td><td>複線</td></tr>
+    <tr><td><span class="cmd">M</span></td><td>移動</td><td><span class="cmd">CO</span></td><td>複写</td><td><span class="cmd">RO</span></td><td>回転</td></tr>
+    <tr><td><span class="cmd">MI</span></td><td>鏡像</td><td><span class="cmd">O</span></td><td>平行</td><td><span class="cmd">TR</span></td><td>トリム</td></tr>
+    <tr><td><span class="cmd">EX</span></td><td>延長</td><td><span class="cmd">CN</span></td><td>結合</td><td><span class="cmd">F</span></td><td>角丸</td></tr>
+    <tr><td><span class="cmd">E</span></td><td>削除</td><td><span class="cmd">T</span></td><td>文字</td><td><span class="cmd">LD</span></td><td>引出線</td></tr>
+    <tr><td><span class="cmd">DIM</span></td><td>寸法</td><td><span class="cmd">H</span></td><td>塗り</td><td><span class="cmd">DI</span></td><td>計測</td></tr>
+    <tr><td><span class="cmd">B</span></td><td>部品化</td><td><span class="cmd">I</span></td><td>配置</td><td></td><td></td></tr>
+  </table>
+
+  <h3>クイックバーの幅調整</h3>
+  <figure class="crop">
+    <img src="guide_img/12_quickwide.png" alt="横に広げたクイックバー">
+    <figcaption>クイックバーの<b>右端をドラッグ</b>して広げると、ツールが横一列に。狭めれば複数行に。⚙から表示するツールを選べます。</figcaption>
+  </figure>
+</section>
+
+<hr class="div">
+<!-- ============== HEALTH ARCHI への導線（戦略的HP誘導CTA） ============== -->
+<section style="margin-top:48px;padding:32px 28px;background:linear-gradient(135deg,#1b2b4b 0%,#0e1a2f 100%);border-radius:10px;color:#fff;font-family:'Hiragino Sans','Yu Gothic UI',sans-serif;">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.3em;color:#d4925a;text-transform:uppercase;margin-bottom:14px;">HEALTH ARCHI</div>
+  <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:10px;color:#fff;border:none;padding:0;">このCADは、HEALTH ARCHI 実験室で公開している無料ツールの1つです。</h2>
+  <p style="font-size:0.92rem;line-height:1.85;color:rgba(255,255,255,0.72);margin-bottom:24px;">
+    HEALTH ARCHIは「<b style="color:#d4925a;">建設業に携わる人が、本来の仕事に戻る</b>」をテーマに、<br>
+    一級建築士・建設業17年の実務経験から生まれたツールとAI活用ノウハウを公開しています。<br>
+    新しい無料ツールも、LINE登録で公開のたびにお知らせします。
+  </p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;">
+    <a href="https://healtharchi.com/tools" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#d4925a;color:#1b2b4b;text-decoration:none;padding:11px 22px;border-radius:5px;font-size:0.9rem;font-weight:700;">🧪 実験室で他のツールを見る</a>
+    <a href="https://line.me/R/ti/p/@045hrvke" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:#06C755;color:#fff;text-decoration:none;padding:11px 22px;border-radius:5px;font-size:0.9rem;font-weight:700;">💬 LINEで新ツール公開を受け取る</a>
+    <a href="https://healtharchi.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:#fff;text-decoration:none;padding:11px 22px;border-radius:5px;font-size:0.9rem;font-weight:700;border:1px solid rgba(255,255,255,0.3);">🏠 HEALTH ARCHI トップ</a>
+  </div>
+  <p style="margin-top:20px;font-size:0.78rem;color:rgba(255,255,255,0.4);line-height:1.7;">
+    HEALTH ARCHIは、工務店社長向けに会社専用AI経営パートナー「ISHIZUE」を構築する建設業特化型DX事業を運営しています。<br>
+    一級建築士・設計現場監督17年実務／書籍「社長が現場を降りる日」（Amazon販売中）。
+  </p>
+</section>
+
+<hr class="div">
+<footer>
+  <p><b>HEALTH ARCHI CAD</b> 操作ガイド（CAD経験者向け要点版）。本ガイドは画面で読む想定ですが、ブラウザの印刷機能でそのままPDF化・配布できます。</p>
+  <p class="dim">画像は実際のアプリ画面のスクリーンショットです。アプリの更新により表示が一部異なる場合があります。</p>
+</footer>
+
+</div>
+</body>
+</html>
